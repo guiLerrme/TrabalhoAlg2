@@ -41,7 +41,7 @@ int BuscaCliente(Cliente *cliente, int quantidade_cliente,int cpf) // Essa funç
 
 int BuscaEmpresa(Empresa *empresa, int quantidade_empresa, int cnpj)// Essa função é essencial em todos os itens do Menu
 {
-    // Se já existir ele vai retornar o indice com o cnpj, se nao, vai retornar -1
+    // Se já existir ele vai retornar o indice de onde está esse cnpj, se nao, vai retornar -1
     for(int cont_e = 0; cont_e < quantidade_empresa; cont_e++)
     {
         if(empresa[cont_e].cnpj == cnpj)
@@ -54,6 +54,7 @@ int BuscaEmpresa(Empresa *empresa, int quantidade_empresa, int cnpj)// Essa fun�
 
 int BuscaDivida(Divida *divida, int quantidade_divida, int cpf_cliente, int cnpj_empresa)//Aqui verifico se a divida já existe
 {
+    // Se já existir ele vai retornar o indice de onde está essa divida, se nao, vai retornar -1
     for(int cont_d = 0; cont_d < quantidade_divida; cont_d++)
     {
         if(divida[cont_d].cpf_cliente == cpf_cliente && divida[cont_d].cnpj_empresa == cnpj_empresa)
@@ -64,8 +65,20 @@ int BuscaDivida(Divida *divida, int quantidade_divida, int cpf_cliente, int cnpj
     return -1;
 }
 
-//PRECISO DE OUTRA FUNÇÃO QUE VERIFICA SE O CPF E O CNPJ JA ESTAO CADASRTRADOS
+int BuscaClienteEmpresa(Cliente *cliente, Empresa *empresa, int cpf, int cnpj, int quantidade_cliente, int quantidade_empresa)// Esse valida se o CLiente E a Empresa já estao cadastrados, se nao nao deixa
+{
+    if(BuscaCliente(cliente, quantidade_cliente, cpf) != -1 && (BuscaEmpresa(empresa, quantidade_empresa, cnpj) != -1))
+    {
+        printf("\nCLIENTE: %s",cliente[BuscaCliente(cliente, quantidade_cliente, cpf)].nome_cliente);
+        printf("\nEMPRESA: %s\n",empresa[BuscaEmpresa(empresa, quantidade_empresa, cnpj)].nome_empresa);
 
+        return 1;// retora 1 se existir
+    }
+    else
+    {
+        return -1;//retorna -1 se nao existir
+    }
+}
 
 void Menu()
 {
@@ -194,27 +207,31 @@ int main()
                 scanf("%d", &cnpj_divida_temp);
 
                 //LINHA 67
-
-                if (BuscaDivida(divida_lista, quantidade_divida, cpf_divida_temp, cnpj_divida_temp) != -1)
+                if(BuscaClienteEmpresa(cliente_lista, empresa_lista, cpf_divida_temp, cnpj_divida_temp, quantidade_cliente, quantidade_empresa) != -1)
                 {
-                    printf("\n==         DIVIDA JA CADASTRADA NO SISTEMA         ==\n");
+                    if (BuscaDivida(divida_lista, quantidade_divida, cpf_divida_temp, cnpj_divida_temp) != -1)
+                    {
+                        printf("\n==         DIVIDA JA CADASTRADA NO SISTEMA         ==\n");
+                    }
+                    else
+                    {
+                        divida_lista[quantidade_divida].cpf_cliente = cpf_divida_temp;
+                        divida_lista[quantidade_divida].cnpj_empresa = cnpj_divida_temp;
+
+                        printf("Digite o valor dessa Divida: ");
+                        scanf("%f", &divida_lista[quantidade_divida].valor);
+                        printf("\n==          DIVIDA CADASTRADA COM SUCESSO!          ==\n");
+                        quantidade_divida++;
+                    }
                 }
-
-
                 else
                 {
-                    divida_lista[quantidade_divida].cpf_cliente = cpf_divida_temp;
-                    divida_lista[quantidade_divida].cnpj_empresa = cnpj_divida_temp;
-
-                    printf("Digite o valor dessa Divida: ");
-                    scanf("%f", &divida_lista[quantidade_divida].valor);
-                    printf("\n==          DIVIDA CADASTRADA COM SUCESSO!          ==\n");
-                    quantidade_divida++;
+                    printf("\n==    CLIENTE OU EMPRESA AINDA NAO CADASTRADOS     ==\n");
                 }
             }
             else
             {
-                printf("\n==             Digite uma opcao valida!             ==\n");//Valida se está digitando 1,2 ou 3
+                printf("\n==             DIGITE UMA OPCAO VALIDA!             ==\n");//Valida se está digitando 1,2 ou 3
             }
         }
 
@@ -222,7 +239,60 @@ int main()
         {
             Qual_Struct();// Pergunta oq deseja Consultar
             scanf("%d", &flag_struct);
-            // criar outros IFs para cliente/empresa/ divida
+
+            if(flag_struct == 1)
+            {
+                if(quantidade_cliente == 0)// Valida se existe algum cadastrado
+                {
+                    printf("\n==            NENHUM CLIENTE CADASTRADO!            ==\n");
+                }
+                else
+                {
+                    printf("\n==             %d CLIENTES CADASTRADOS             ==\n", quantidade_cliente);
+                    for(int cont_client_for = 0; cont_client_for < quantidade_cliente; cont_client_for++)
+                    {
+                        printf("\nCPF: %d", cliente_lista[cont_client_for].cpf);
+                        printf("\nNOME: %s", cliente_lista[cont_client_for].nome_cliente);
+                        printf("\nIDADE: %d\n", cliente_lista[cont_client_for].idade_cliente);
+                    }
+                }
+            }
+            else if(flag_struct == 2)
+            {
+                if(quantidade_empresa == 0)// Valida se existe algum cadastrado
+                {
+                    printf("\n==           NENHUMA EMPRESA CADASTRADA!            ==\n");
+                }
+                else
+                {
+                    printf("\n==             %d EMPRESAS CADASTRADAS             ==\n", quantidade_empresa);
+                    for(int cont_empresa_for = 0; cont_empresa_for < quantidade_empresa; cont_empresa_for++)
+                    {
+                        printf("\nCNPJ: %d", empresa_lista[cont_empresa_for].cnpj);
+                        printf("\nNOME: %s", empresa_lista[cont_empresa_for].nome_empresa);
+                        printf("\nPRODUTO: %d\n", empresa_lista[cont_empresa_for].produto);
+                    }
+                }
+            }
+            else if(flag_struct == 3)
+                            {
+                if(quantidade_divida == 0)// Valida se existe algum cadastrado
+                {
+                    printf("\n==           NENHUMA DIVIDA CADASTRADA!             ==\n");
+                }
+                else
+                {
+                    printf("\n==             %d DIVIDAS CADASTRADAS             ==\n", quantidade_divida);
+                    for(int cont_divida_for = 0; cont_divida_for < quantidade_divida; cont_divida_for++)
+                    {
+                        printf("\CPF DO CLIENTE: %d", divida_lista[cont_divida_for].cnpj_empresa);
+                        printf("\nCNPJ DO CREDOR: %d", divida_lista[cont_divida_for].cnpj_empresa);
+                        printf("\nVALOR DA DIVIDA: %.2f\n", divida_lista[cont_divida_for].valor);
+                    }
+                }
+            }
+            else
+                printf("\n==             DIGITE UMA OPCAO VALIDA!             ==\n");
         }
 
         else if (flag == 3)  // Atualiza
@@ -243,7 +313,7 @@ int main()
             printf("\n==               PROGRAMA FINALIZADO               ==\n");
         }
         else
-            printf("\n==             Digite uma opcao valida!             ==\n");
+            printf("\n==             DIGITE UMA OPCAO VALIDA!             ==\n");
 
     }
     while (flag != 0);
